@@ -8,8 +8,19 @@ This repository is a mixed local workspace for small frontend demos, Python docu
 - `virtual-pet/` - standalone static browser demo. Open `virtual-pet/index.html` in a browser.
 - `cad-mcp-autocad/` - AutoCAD MCP server project with its own README files and `requirements.txt`.
 - `scripts/` - Python utility scripts for report generation and AutoCAD drawing automation.
+- `docs/` - project protocols and operating notes.
+- `examples/comfy_bridge/` - safe example bridge for local Codex-to-ComfyUI API calls.
 - `overtime-analysis-deck/` - slide deck generation workspace.
 - `output/`, `scratch/`, `docx_render_check/`, `.codex_video_frames/`, `.codex_video_deps/` - generated artifacts, caches, or render outputs.
+
+## Featured Protocol
+
+This workspace includes **StarBridge Link Protocol** (`星桥协议`), a documented process for connecting Codex, GitHub/Jules, and local ComfyUI without publishing private credentials or local cache data.
+
+Start here:
+
+- `docs/starbridge-link-protocol.md`
+- `examples/comfy_bridge/README.md`
 
 ## Current Runtime Notes
 
