@@ -139,6 +139,10 @@ flowchart LR
 - `examples/comfy_bridge/README.md`  
   ComfyUI 桥接示例说明。
 
+- `examples/bridge_status.py`
+
+  星桥三联本地状态检查脚本：一次检查 ComfyUI、Blender 和 CAD 桥接准备情况，不读取凭据和私人素材。
+
 - `examples/comfy_bridge/comfy_probe.py`  
   只读探针：读取 ComfyUI 状态、显卡和 checkpoint。
 
@@ -164,10 +168,10 @@ flowchart LR
 
 ## 下一步路线
 
+- 已增加统一的 `examples/bridge_status.py`，可一次检查 ComfyUI、Blender 和 CAD 三条桥是否在线或可配置。
 - 为 ComfyUI 增加 `img2img`、放大、修复和批量提示词示例。
 - 为 Blender 5.0 增加一个公开安全的场景生成脚本示例。
 - 为 CAD 增加一个公开安全的标准零件绘图脚本示例。
-- 增加统一的 `bridge_status.py`，一次检查 ComfyUI、Blender 和 CAD 三条桥是否在线。
 - 后续将三条桥逐步包装成 MCP 工具，让 Codex 可以稳定调用、记录结果并提示风险。
 
 ## 结语

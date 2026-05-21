@@ -34,6 +34,12 @@ Start ComfyUI first, then run:
 python examples/comfy_bridge/comfy_probe.py
 ```
 
+Check the full StarBridge local environment:
+
+```powershell
+python examples/bridge_status.py
+```
+
 Generate an image:
 
 ```powershell

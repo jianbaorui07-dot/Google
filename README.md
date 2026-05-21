@@ -20,11 +20,25 @@ This workspace includes **StarBridge Trinity Protocol** (`星桥三联`), a docu
 Start here:
 
 - `docs/starbridge-link-protocol.md`
+- `docs/中文用途索引.md`
+- `examples/bridge_status.py`
 - `examples/comfy_bridge/README.md`
+
+Quick local bridge check:
+
+```powershell
+python examples\bridge_status.py
+```
+
+Or through npm:
+
+```powershell
+npm run bridge:status
+```
 
 ## Current Runtime Notes
 
-- Root `package.json` exists but only declares `"private": true` and `"type": "module"`; it does not define npm scripts.
+- Root `package.json` includes convenience scripts for local bridge checks; it does not install dependencies.
 - Root `requirements.txt` does not exist. Python dependencies vary by script.
 - `cad-mcp-autocad/requirements.txt` lists the Python dependencies for the AutoCAD MCP server.
 - This workspace currently does not use a ComfyUI `custom_nodes/` layout.
@@ -54,6 +68,23 @@ python scripts\<script-name>.py
 ```
 
 Some scripts require Windows-only automation packages such as `pywin32`, local AutoCAD, or document-generation packages such as `python-docx`, `pandas`, `opencv-python`, and `numpy`. Check imports before running an individual script.
+
+StarBridge status check:
+
+```powershell
+python examples\bridge_status.py
+python examples\bridge_status.py --json
+python examples\bridge_status.py --probe-executables
+```
+
+The status script checks local ComfyUI, Blender, and CAD bridge readiness without reading credentials, browser data, model files, generated images, or private project assets.
+
+Useful environment variables for bridge detection:
+
+- `COMFY_BASE_URL`, default `http://127.0.0.1:8188`
+- `BLENDER_EXE`, full path to `blender.exe`
+- `BLENDER_MCP_DIR`, full path to a local Blender MCP bridge directory
+- `AUTOCAD_EXE`, full path to `acad.exe`
 
 ## GitHub / Jules Readiness
 
