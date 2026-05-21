@@ -15,7 +15,7 @@ This repository is a mixed local workspace for small frontend demos, Python docu
 
 ## Featured Protocol
 
-This workspace includes **StarBridge Link Protocol** (`星桥协议`), a documented process for connecting Codex, GitHub/Jules, and local ComfyUI without publishing private credentials or local cache data.
+This workspace includes **StarBridge Trinity Protocol** (`星桥三联`), a documented process for connecting Codex, GitHub/Jules, local ComfyUI, Blender 5.0, and CAD without publishing private credentials or local cache data.
 
 Start here:
 
