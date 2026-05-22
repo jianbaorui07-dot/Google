@@ -23,6 +23,7 @@
 | 区域 | 目录或文件 | 中文说明 |
 | --- | --- | --- |
 | 总览区 | `README.md`、`docs/中文介绍.md` | 说明星桥整体方案和安全边界 |
+| 协议入口区 | `docs/starbridge-link-protocol.md` | 兼容旧链接，并提供四条桥导航和 Photoshop 本机实操入口 |
 | 中文索引区 | `docs/中文用途索引.md` | 用中文标注每个主要文件的用途 |
 | 状态检查区 | `examples/bridge_status.py` | 一次检查 ComfyUI、Blender、CAD、Photoshop 四条桥 |
 | 图像生成区 | `examples/comfy_bridge/` | 连接本机 ComfyUI，检查模型并提交文生图 |

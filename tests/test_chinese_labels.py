@@ -43,6 +43,15 @@ class ChineseLabelCoverageTest(unittest.TestCase):
         self.assertIn("每个区域必须有中文名称", standard)
         self.assertIn("每张示例 CAD 图必须有中文区域标注", standard)
 
+    def test_starbridge_protocol_links_photoshop_practice(self) -> None:
+        protocol = self.read_text("docs/starbridge-link-protocol.md")
+        index = self.read_text("docs/中文用途索引.md")
+
+        self.assertIn("星桥链接协议", protocol)
+        self.assertIn("Photoshop 本机接入实操", protocol)
+        self.assertIn("run_local_practice.ps1", protocol)
+        self.assertIn("星桥链接协议入口", index)
+
 
 if __name__ == "__main__":
     unittest.main()

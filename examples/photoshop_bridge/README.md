@@ -9,7 +9,23 @@
 - PowerShell 可以创建 `Photoshop.Application` COM 对象。
 - 运行前建议先手动打开 Photoshop，避免脚本触发不受控的启动流程。
 
-## 区域二：COM 探针
+## 区域二：一键本机实操
+
+运行一次完整闭环：连接 Photoshop、创建测试文档、生成公开安全测试图、执行主体抠图、输出 JSON 结果。
+
+```powershell
+powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\run_local_practice.ps1
+```
+
+默认输出到：
+
+```text
+output\photoshop_bridge_practice\
+```
+
+这个目录属于本机生成物，不进入 GitHub。
+
+## 区域三：COM 探针
 
 创建一个测试文档并导出 PNG：
 
@@ -19,7 +35,7 @@ powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\com_p
 
 返回结果为 JSON，包含 Photoshop 版本、输出路径、文档尺寸和图层数。
 
-## 区域三：主体抠图
+## 区域四：主体抠图
 
 从输入图里尝试提取主体，并导出透明 PNG：
 
@@ -29,7 +45,7 @@ powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\extra
 
 脚本使用 Photoshop 的主体选择能力。复杂海报、文字背景、线稿背景可能会带出背景残留，适合作为半自动起点，不保证一次达到商业级精修。
 
-## 区域四：安全边界
+## 区域五：安全边界
 
 - 不覆盖原图，只输出新文件。
 - 不提交输入图、输出图、PSD、字体、笔刷、素材库或账号信息。

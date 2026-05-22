@@ -15,6 +15,7 @@
 | --- | --- |
 | `docs/photoshop-codex-bridge.md` | Photoshop 本地桥详细方案 |
 | `examples/photoshop_bridge/README.md` | Photoshop 示例说明 |
+| `examples/photoshop_bridge/scripts/run_local_practice.ps1` | 一键本机实操：COM 探针、测试图生成、主体抠图 |
 | `examples/photoshop_bridge/scripts/com_probe.ps1` | COM 探针，创建测试文档并导出 PNG |
 | `examples/photoshop_bridge/scripts/extract_subject_to_png.ps1` | 主体选择和透明 PNG 输出实验 |
 
@@ -29,6 +30,14 @@ $env:PHOTOSHOP_EXE="<path-to-Photoshop.exe>"
 运行前建议手动打开 Photoshop，避免脚本触发不受控启动流程。
 
 ## 验证命令
+
+一键本机实操：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\run_local_practice.ps1
+```
+
+单独运行 COM 探针：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\com_probe.ps1 -OutputPath "$env:TEMP\codex_photoshop_probe.png"
