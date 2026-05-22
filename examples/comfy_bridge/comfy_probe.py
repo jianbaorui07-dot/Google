@@ -40,27 +40,30 @@ def build_status(base_url: str, timeout: int) -> dict:
 
 
 def print_text_report(status: dict) -> None:
-    print("ComfyUI API:", status["base_url"])
-    print("Version:", status.get("version"))
-    print("Python:", status.get("python"))
+    print("ComfyUI 图像生成桥状态")
+    print("=" * 24)
+    print("接口地址:", status["base_url"])
+    print("ComfyUI 版本:", status.get("version"))
+    print("Python 版本:", status.get("python"))
 
     for device in status.get("devices", []):
-        print("Device:", device.get("name"))
-        print("VRAM free:", device.get("vram_free"))
+        print("显卡设备:", device.get("name"))
+        print("剩余显存:", device.get("vram_free"))
 
-    print("Checkpoints:")
+    print("可用 checkpoint:")
     for name in status["checkpoints"]:
         print("-", name)
 
-    print("Queue running:", status["queue_running"])
-    print("Queue pending:", status["queue_pending"])
+    print("正在运行任务:", status["queue_running"])
+    print("等待队列任务:", status["queue_pending"])
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Read local ComfyUI status and available checkpoints.")
-    parser.add_argument("--comfy-url", default=DEFAULT_BASE_URL, help="ComfyUI API base URL.")
-    parser.add_argument("--timeout", type=int, default=20, help="HTTP request timeout in seconds.")
-    parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
+    parser = argparse.ArgumentParser(description="读取本机 ComfyUI 状态、显卡信息和 checkpoint 列表。", add_help=False)
+    parser.add_argument("-h", "--help", action="help", help="显示帮助并退出。")
+    parser.add_argument("--comfy-url", default=DEFAULT_BASE_URL, help="ComfyUI API 地址。")
+    parser.add_argument("--timeout", type=int, default=20, help="HTTP 请求超时时间，单位秒。")
+    parser.add_argument("--json", action="store_true", help="输出机器可读 JSON。")
     args = parser.parse_args()
 
     try:
@@ -73,7 +76,7 @@ def main() -> None:
         }
         if args.json:
             print(json.dumps(error, ensure_ascii=False, indent=2))
-        raise SystemExit(f"ComfyUI is not reachable or returned an unexpected response: {exc}") from exc
+        raise SystemExit(f"ComfyUI 无法连接，或返回内容不符合预期：{exc}") from exc
 
     if args.json:
         print(json.dumps({"status": "ok", **status}, ensure_ascii=False, indent=2))

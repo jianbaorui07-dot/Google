@@ -16,8 +16,8 @@
 | `cad-mcp-autocad/` | AutoCAD MCP 子项目 |
 | `AUTOCAD_MCP_SETUP.md` | AutoCAD MCP 通用配置说明 |
 | `scripts/test_autocad_mcp.py` | MCP 连接测试脚本 |
-| `scripts/draw_connection_plate_from_spec.py` | 参数化连接板示例 |
-| `scripts/draw_reference_mechanical_part.py` | 参考机械零件绘图示例 |
+| `scripts/draw_connection_plate_from_spec.py` | 参数化连接板示例，图中带中文区域标注 |
+| `scripts/draw_reference_mechanical_part.py` | 参考机械零件绘图示例，图中带中文区域标注 |
 
 ## 本地配置
 
@@ -41,6 +41,19 @@ python scripts\test_autocad_mcp.py
 ```
 
 如果 AutoCAD 已打开，脚本会尝试通过本地 COM / MCP 调用绘图动作。生成的 DWG 只保留本机，不提交。
+
+## 图纸中文标注
+
+公开示例图纸应让中国用户一眼看懂每个区域：
+
+| 图纸区域 | 中文标注示例 |
+| --- | --- |
+| 标题区 | `连接板参数化示例（单位：mm）` |
+| 主孔区 | `主圆孔区：外圆 %%c44 / 内孔 %%c24` |
+| 安装孔区 | `左上安装孔区`、`右下小孔区` |
+| 轮廓区 | `外轮廓连接区`、`R80 圆弧过渡` |
+| 基准区 | `中心线基准：孔距和角度从这里读取` |
+| 安全说明 | `公开演示图纸：只含虚构尺寸，不含客户数据` |
 
 ## 安全边界
 

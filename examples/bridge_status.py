@@ -15,6 +15,12 @@ from pathlib import Path
 DEFAULT_COMFY_URL = "http://127.0.0.1:8188"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DOWNLOAD_INBOX = os.environ.get("STARBRIDGE_DOWNLOAD_INBOX")
+STATUS_LABELS = {
+    "ok": "正常",
+    "warn": "需配置",
+    "missing": "未找到",
+    "error": "错误",
+}
 
 
 def unique_paths(paths: list[Path]) -> list[Path]:
@@ -28,10 +34,12 @@ def unique_paths(paths: list[Path]) -> list[Path]:
     return result
 
 
-def status(name: str, state: str, details: list[str], data: dict | None = None) -> dict:
+def status(name: str, state: str, details: list[str], data: dict | None = None, label: str | None = None) -> dict:
     return {
         "name": name,
+        "label": label or name,
         "status": state,
+        "status_label": STATUS_LABELS.get(state, state),
         "details": details,
         "data": data or {},
     }
@@ -78,16 +86,17 @@ def check_comfy(base_url: str, timeout: int) -> dict:
         stats = get_json(base_url, "/system_stats", timeout)
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
         details = [
-            f"Not reachable at {base_url}.",
-            f"Error: {exc}",
-            "Start ComfyUI first, then rerun this script.",
+            f"接口地址：{base_url}",
+            f"状态说明：无法连接 ComfyUI。",
+            f"错误信息：{exc}",
+            "处理建议：先启动 ComfyUI，再重新运行本脚本。",
         ]
         if comfy_root:
-            details.append(f"Local ComfyUI root: {comfy_root}")
+            details.append(f"本机 ComfyUI 根目录：{comfy_root}")
         if comfy_launcher:
-            details.append(f"Launch script: {comfy_launcher}")
+            details.append(f"本机启动脚本：{comfy_launcher}")
         if DOWNLOAD_INBOX:
-            details.append(f"Download inbox configured by STARBRIDGE_DOWNLOAD_INBOX: {DOWNLOAD_INBOX}")
+            details.append(f"下载收件箱 STARBRIDGE_DOWNLOAD_INBOX：{DOWNLOAD_INBOX}")
         return status(
             "ComfyUI",
             "missing",
@@ -97,35 +106,36 @@ def check_comfy(base_url: str, timeout: int) -> dict:
                 "local_root": str(comfy_root) if comfy_root else None,
                 "launcher": str(comfy_launcher) if comfy_launcher else None,
             },
+            "ComfyUI 图像生成桥",
         )
 
     system = stats.get("system", {})
     devices = stats.get("devices", [])
     details = [
-        f"API: {base_url}",
-        f"ComfyUI version: {system.get('comfyui_version') or 'unknown'}",
-        f"Python: {system.get('python_version') or 'unknown'}",
-        f"Devices: {len(devices)}",
+        f"接口地址：{base_url}",
+        f"ComfyUI 版本：{system.get('comfyui_version') or '未知'}",
+        f"Python 版本：{system.get('python_version') or '未知'}",
+        f"显卡设备数量：{len(devices)}",
     ]
 
     try:
         queue = get_json(base_url, "/queue", timeout)
-        details.append(f"Queue running: {len(queue.get('queue_running', []))}")
-        details.append(f"Queue pending: {len(queue.get('queue_pending', []))}")
+        details.append(f"正在运行任务：{len(queue.get('queue_running', []))}")
+        details.append(f"等待队列任务：{len(queue.get('queue_pending', []))}")
     except Exception as exc:  # noqa: BLE001 - status script should keep going.
-        details.append(f"Queue check failed: {exc}")
+        details.append(f"队列检查失败：{exc}")
 
     try:
         loader = get_json(base_url, "/object_info/CheckpointLoaderSimple", timeout)
         checkpoints = loader["CheckpointLoaderSimple"]["input"]["required"]["ckpt_name"][0]
-        details.append(f"Checkpoints: {len(checkpoints)}")
+        details.append(f"可用 checkpoint 数量：{len(checkpoints)}")
     except Exception as exc:  # noqa: BLE001 - status script should keep going.
-        details.append(f"Checkpoint check failed: {exc}")
+        details.append(f"checkpoint 检查失败：{exc}")
 
     if comfy_root:
-        details.append(f"Local ComfyUI root: {comfy_root}")
+        details.append(f"本机 ComfyUI 根目录：{comfy_root}")
     if comfy_launcher:
-        details.append(f"Launch script: {comfy_launcher}")
+        details.append(f"本机启动脚本：{comfy_launcher}")
 
     return status(
         "ComfyUI",
@@ -136,6 +146,7 @@ def check_comfy(base_url: str, timeout: int) -> dict:
             "local_root": str(comfy_root) if comfy_root else None,
             "launcher": str(comfy_launcher) if comfy_launcher else None,
         },
+        "ComfyUI 图像生成桥",
     )
 
 
@@ -203,44 +214,46 @@ def check_blender(probe_executable: bool, timeout: int) -> dict:
         blender_mcp_launcher = None
     if not blender:
         details = [
-            "No Blender executable found.",
-            "Set BLENDER_EXE to the full blender.exe path or install Blender in a standard location.",
-            f"Blender MCP bridge: {blender_mcp if blender_mcp else 'not found'}",
+            "状态说明：未找到 Blender 可执行文件。",
+            "处理建议：把 BLENDER_EXE 设置为完整 blender.exe 路径，或安装到常见目录。",
+            f"Blender MCP 桥目录：{blender_mcp if blender_mcp else '未找到'}",
         ]
         if blender_mcp_launcher:
-            details.append(f"Blender MCP launch script: {blender_mcp_launcher}")
+            details.append(f"Blender MCP 启动脚本：{blender_mcp_launcher}")
         if blender_mcp:
             return status(
                 "Blender",
                 "warn",
                 [
                     *details,
-                    "Bridge files exist, but the Blender executable is not configured yet.",
+                    "桥接文件存在，但 Blender 可执行文件还没有配置。",
                 ],
                 {
                     "blender_mcp_dir": str(blender_mcp),
                     "blender_mcp_launcher": str(blender_mcp_launcher) if blender_mcp_launcher else None,
                 },
+                "Blender 三维场景桥",
             )
         return status(
             "Blender",
             "missing",
             details,
+            label="Blender 三维场景桥",
         )
 
     details = [
-        f"Executable: {blender}",
-        f"Blender MCP bridge: {blender_mcp if blender_mcp else 'not found'}",
+        f"Blender 可执行文件：{blender}",
+        f"Blender MCP 桥目录：{blender_mcp if blender_mcp else '未找到'}",
     ]
     if blender_mcp_launcher:
-        details.append(f"Blender MCP launch script: {blender_mcp_launcher}")
+        details.append(f"Blender MCP 启动脚本：{blender_mcp_launcher}")
     if probe_executable:
         try:
-            details.append(f"Version probe: {command_version(blender, ['--version'], timeout)}")
+            details.append(f"版本探测：{command_version(blender, ['--version'], timeout)}")
         except Exception as exc:  # noqa: BLE001 - status script should keep going.
-            return status("Blender", "warn", [*details, f"Version probe failed: {exc}"])
+            return status("Blender", "warn", [*details, f"版本探测失败：{exc}"], label="Blender 三维场景桥")
     else:
-        details.append("Executable probe skipped. Use --probe-executables to run blender --version.")
+        details.append("已跳过可执行文件探测。需要运行 blender --version 时加 --probe-executables。")
 
     return status(
         "Blender",
@@ -251,6 +264,7 @@ def check_blender(probe_executable: bool, timeout: int) -> dict:
             "blender_mcp_dir": str(blender_mcp) if blender_mcp else None,
             "blender_mcp_launcher": str(blender_mcp_launcher) if blender_mcp_launcher else None,
         },
+        "Blender 三维场景桥",
     )
 
 
@@ -280,22 +294,22 @@ def check_cad() -> dict:
     has_win32com = importlib.util.find_spec("win32com") is not None
 
     details = [
-        f"MCP server: {'found' if server.exists() else 'missing'} ({server})",
-        f"Requirements: {'found' if requirements.exists() else 'missing'} ({requirements})",
-        f"AutoCAD executable: {autocad if autocad else 'not found'}",
-        f"Current Python has pywin32/win32com: {has_win32com}",
+        f"MCP 服务脚本：{'已找到' if server.exists() else '未找到'}（{server}）",
+        f"依赖文件：{'已找到' if requirements.exists() else '未找到'}（{requirements}）",
+        f"AutoCAD 可执行文件：{autocad if autocad else '未找到'}",
+        f"当前 Python 是否有 pywin32/win32com：{has_win32com}",
     ]
 
     if server.exists() and autocad:
         state = "ok"
     elif server.exists():
         state = "warn"
-        details.append("MCP project exists, but AutoCAD was not found in default locations.")
+        details.append("CAD MCP 项目存在，但默认目录和 AUTOCAD_EXE 中未找到 AutoCAD。")
     else:
         state = "missing"
-        details.append("AutoCAD MCP server project is missing.")
+        details.append("AutoCAD MCP 服务项目缺失。")
 
-    return status("CAD", state, details, {"autocad_executable": str(autocad) if autocad else None})
+    return status("CAD", state, details, {"autocad_executable": str(autocad) if autocad else None}, "CAD 工程制图桥")
 
 
 def find_photoshop() -> Path | None:
@@ -311,10 +325,10 @@ def check_photoshop(probe_com: bool) -> dict:
     photoshop = find_photoshop()
     has_win32com = importlib.util.find_spec("win32com") is not None
     details = [
-        "Photoshop install path is intentionally not hardcoded.",
-        f"PHOTOSHOP_EXE configured: {bool(os.environ.get('PHOTOSHOP_EXE'))}",
-        f"PHOTOSHOP_EXE exists: {bool(photoshop)}",
-        f"Current Python has pywin32/win32com: {has_win32com}",
+        "安全说明：Photoshop 安装路径不写死在公开仓库里。",
+        f"是否配置 PHOTOSHOP_EXE：{bool(os.environ.get('PHOTOSHOP_EXE'))}",
+        f"PHOTOSHOP_EXE 路径是否存在：{bool(photoshop)}",
+        f"当前 Python 是否有 pywin32/win32com：{has_win32com}",
     ]
     data: dict[str, str | bool | int | None] = {
         "photoshop_exe_configured": bool(os.environ.get("PHOTOSHOP_EXE")),
@@ -323,12 +337,12 @@ def check_photoshop(probe_com: bool) -> dict:
     }
 
     if not probe_com:
-        details.append("COM probe skipped. Use --probe-executables to attach to an already running Photoshop.")
-        return status("Photoshop", "warn" if not has_win32com else "ok", details, data)
+        details.append("已跳过 COM 探测。需要连接已打开的 Photoshop 时加 --probe-executables。")
+        return status("Photoshop", "warn" if not has_win32com else "ok", details, data, "Photoshop 修图桥")
 
     if not has_win32com:
-        details.append("Install pywin32 if Python-based COM probing is needed.")
-        return status("Photoshop", "warn", details, data)
+        details.append("处理建议：如需 Python COM 探测，请安装 pywin32。")
+        return status("Photoshop", "warn", details, data, "Photoshop 修图桥")
 
     try:
         import win32com.client  # type: ignore[import-not-found]
@@ -336,40 +350,39 @@ def check_photoshop(probe_com: bool) -> dict:
         app = win32com.client.GetActiveObject("Photoshop.Application")
         version = str(app.Version)
         documents = int(app.Documents.Count)
-        details.append(f"Active Photoshop COM object: found, version {version}, documents {documents}")
+        details.append(f"已连接 Photoshop COM：版本 {version}，当前文档数 {documents}")
         data.update({"active_com_object": True, "version": version, "documents": documents})
-        return status("Photoshop", "ok", details, data)
+        return status("Photoshop", "ok", details, data, "Photoshop 修图桥")
     except Exception as exc:  # noqa: BLE001 - status script should keep going.
-        details.append(f"Active Photoshop COM object not found: {exc}")
-        details.append("Open Photoshop manually, then rerun with --probe-executables.")
+        details.append(f"未找到正在运行的 Photoshop COM 对象：{exc}")
+        details.append("处理建议：手动打开 Photoshop 后，再加 --probe-executables 运行。")
         data["active_com_object"] = False
-        return status("Photoshop", "warn", details, data)
+        return status("Photoshop", "warn", details, data, "Photoshop 修图桥")
 
 
 def print_text_report(results: list[dict]) -> None:
-    print("StarBridge local bridge status")
-    print("=" * 30)
+    print("星桥本地软件接入状态")
+    print("=" * 28)
     for result in results:
-        marker = {"ok": "OK", "warn": "WARN", "missing": "MISSING", "error": "ERROR"}.get(
-            result["status"], result["status"].upper()
-        )
-        print(f"\n[{marker}] {result['name']}")
+        print(f"\n[{result['status_label']}] {result['label']}")
         for detail in result["details"]:
             print(f"- {detail}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Check local StarBridge integrations without reading credentials or private files."
+        description="检查星桥本地软件接入状态，不读取账号、密钥或私有素材。",
+        add_help=False,
     )
+    parser.add_argument("-h", "--help", action="help", help="显示帮助并退出。")
     parser.add_argument("--comfy-url", default=os.environ.get("COMFY_BASE_URL", DEFAULT_COMFY_URL))
     parser.add_argument("--timeout", type=int, default=8)
     parser.add_argument(
         "--probe-executables",
         action="store_true",
-        help="Run lightweight version commands for detected executables. This may start slow vendor binaries.",
+        help="对已找到的软件运行轻量版本探测；部分商业软件可能启动较慢。",
     )
-    parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
+    parser.add_argument("--json", action="store_true", help="输出机器可读 JSON。")
     args = parser.parse_args()
 
     results = [
@@ -392,5 +405,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     if sys.version_info < (3, 10):
-        raise SystemExit("Python 3.10+ is recommended for this status script.")
+        raise SystemExit("建议使用 Python 3.10 或更新版本运行本状态脚本。")
     main()

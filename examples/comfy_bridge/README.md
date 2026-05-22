@@ -1,84 +1,116 @@
-# Comfy Bridge Example
+# ComfyUI 图像生成桥示例
 
-This folder contains a safe example bridge for connecting local Codex automation to a local ComfyUI server.
+这个目录保存 Codex 连接本机 ComfyUI 的公开安全示例。所有说明都按中文使用场景组织：先看区域用途，再看运行命令，最后看安全边界。
 
-## What It Does
+## 区域一：这个目录做什么
 
-- Checks whether ComfyUI is online at `http://127.0.0.1:8188`.
-- Reads system stats and checkpoint names.
-- Submits a basic text-to-image workflow through the ComfyUI HTTP API.
-- Keeps the visual workflow JSON separate from the API workflow JSON.
+- 检查本机 ComfyUI 是否在线，默认地址是 `http://127.0.0.1:8188`。
+- 读取 ComfyUI 版本、Python 版本、显卡信息、checkpoint 列表和队列状态。
+- 通过 ComfyUI HTTP API 提交基础文生图 workflow。
+- 同时保留 API workflow 和可视化 workflow，方便人打开节点图检查。
 
-## What It Does Not Include
+## 区域二：这个目录不放什么
 
-- No account passwords.
-- No OAuth tokens.
-- No browser cookies.
-- No payment data.
-- No private model files.
-- No generated image output.
-- No local browser profile data.
+- 不放账号、密码、验证码、Cookie、token、OAuth 缓存。
+- 不放模型、LoRA、VAE、ControlNet、checkpoint 文件。
+- 不放生成图片、客户素材、浏览器资料、付费 API key。
+- 不写死本机路径，所有路径都通过环境变量或命令行参数传入。
 
-## Files
+## 区域三：文件中文标注
 
-- `comfy_probe.py` checks ComfyUI status and available checkpoints.
-- `run_txt2img.py` submits a minimal text-to-image workflow.
-- `workflows/txt2img_basic_api.json` is the API workflow used by the script.
-- `workflows/txt2img_basic_visual.json` is the visual workflow that can be opened inside the ComfyUI canvas.
+| 文件 | 中文用途 |
+| --- | --- |
+| `comfy_probe.py` | ComfyUI 只读探针：检查服务、显卡、checkpoint 和队列 |
+| `run_txt2img.py` | 文生图提交脚本：把 prompt 提交给本机 ComfyUI |
+| `workflows/txt2img_basic_api.json` | API 工作流：给脚本提交到 `/prompt` 使用 |
+| `workflows/txt2img_basic_visual.json` | 可视化工作流：给人在 ComfyUI 画布中打开检查 |
 
-## Usage
+## 区域四：运行前准备
 
-Start ComfyUI first, then run:
+先手动启动 ComfyUI，并确认浏览器能打开：
 
-```powershell
-python examples/comfy_bridge/comfy_probe.py
-python examples/comfy_bridge/comfy_probe.py --json
+```text
+http://127.0.0.1:8188
 ```
 
-Optional local launcher:
+如果你的 ComfyUI 不在默认地址，设置环境变量：
+
+```powershell
+$env:COMFY_BASE_URL="http://127.0.0.1:8188"
+```
+
+可选：配置本机启动脚本和输出目录：
 
 ```powershell
 $env:COMFY_LAUNCHER="<path-to-Start_ComfyUI.cmd>"
-& $env:COMFY_LAUNCHER
+$env:COMFY_OUTPUT_DIR="<path-to-ComfyUI-output>"
 ```
 
-Check the full StarBridge local environment:
+## 区域五：状态检查命令
+
+普通中文报告：
+
+```powershell
+python examples/comfy_bridge/comfy_probe.py
+```
+
+机器可读 JSON：
+
+```powershell
+python examples/comfy_bridge/comfy_probe.py --json
+```
+
+全仓库四条桥一起检查：
 
 ```powershell
 python examples/bridge_status.py
 ```
 
-Generate an image:
+## 区域六：文生图命令
+
+使用 ComfyUI 返回的第一个 checkpoint：
 
 ```powershell
-python examples/comfy_bridge/run_txt2img.py --prompt "a quiet futuristic tea house in a garden"
+python examples/comfy_bridge/run_txt2img.py --prompt "一间安静的未来茶室，花园里有柔和灯光"
 ```
 
-`run_txt2img.py` defaults to the first checkpoint reported by ComfyUI. Use `--ckpt "<checkpoint-name>"` when you want a specific model.
+指定 checkpoint：
 
-Optional environment variables:
-
-- `COMFY_BASE_URL`, default `http://127.0.0.1:8188`
-- `COMFY_OUTPUT_DIR`, optional explicit ComfyUI output directory
-- `COMFY_ROOT` or `COMFYUI_PATH`, optional explicit ComfyUI root for status checks
-- `COMFY_LAUNCHER` or `COMFY_START_SCRIPT`, optional explicit ComfyUI launch script for status checks
-
-New downloaded source projects, installers, and research bundles should go under your local download inbox, configured outside Git with `STARBRIDGE_DOWNLOAD_INBOX`. Do not place model files, generated images, browser profiles, tokens, or private assets in this Git workspace.
-
-## Visual Workflow
-
-Open this file inside ComfyUI:
-
-```text
-examples/comfy_bridge/workflows/txt2img_basic_visual.json
+```powershell
+python examples/comfy_bridge/run_txt2img.py --prompt "一间安静的未来茶室" --ckpt "<checkpoint-name>"
 ```
 
-The visual workflow contains these nodes:
+指定尺寸、步数、输出前缀：
 
-- `CheckpointLoaderSimple`
-- `EmptyLatentImage`
-- `CLIPTextEncode` positive prompt
-- `CLIPTextEncode` negative prompt
-- `KSampler`
-- `VAEDecode`
-- `SaveImage`
+```powershell
+python examples/comfy_bridge/run_txt2img.py --prompt "中式庭院里的机械花灯" --width 768 --height 768 --steps 20 --prefix "codex_中文示例"
+```
+
+## 区域七：命令行参数中文说明
+
+| 参数 | 中文说明 |
+| --- | --- |
+| `--prompt` | 正向提示词，必填 |
+| `--negative` | 反向提示词，默认过滤低质量、模糊、文字水印 |
+| `--ckpt` | 指定 checkpoint 名称；不传时自动用第一个可用 checkpoint |
+| `--width` / `--height` | 输出图宽高 |
+| `--steps` | 采样步数 |
+| `--cfg` | 提示词引导强度 |
+| `--seed` | 随机种子；不传时自动生成 |
+| `--prefix` | 保存文件前缀 |
+| `--timeout` | 等待 ComfyUI 任务完成的最长时间 |
+| `--request-timeout` | 单次 HTTP 请求超时时间 |
+
+## 区域八：环境变量中文说明
+
+| 环境变量 | 中文说明 |
+| --- | --- |
+| `COMFY_BASE_URL` | ComfyUI API 地址，默认 `http://127.0.0.1:8188` |
+| `COMFY_OUTPUT_DIR` | ComfyUI 输出目录，用来打印最终图片路径 |
+| `COMFY_ROOT` 或 `COMFYUI_PATH` | 本机 ComfyUI 根目录，供总状态检查显示 |
+| `COMFY_LAUNCHER` 或 `COMFY_START_SCRIPT` | 本机 ComfyUI 启动脚本路径 |
+| `STARBRIDGE_DOWNLOAD_INBOX` | 下载收件箱，放源码包、安装包和调研资料 |
+
+## 区域九：安全边界
+
+新下载的源码项目、安装包和调研资料应放在本机下载收件箱，不放进 Git 仓库。模型、生成图片、浏览器资料、token、私有素材和客户文件都只留本机。

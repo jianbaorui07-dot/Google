@@ -49,7 +49,7 @@ def resolve_checkpoint(args: argparse.Namespace) -> str:
 
     checkpoints = get_checkpoint_names(args.comfy_url, args.request_timeout)
     if not checkpoints:
-        raise SystemExit("No ComfyUI checkpoints were reported. Install or enable a checkpoint first.")
+        raise SystemExit("ComfyUI 没有返回可用 checkpoint。请先安装或启用至少一个模型。")
     return checkpoints[0]
 
 
@@ -91,45 +91,47 @@ def wait_for_outputs(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Submit a basic txt2img workflow to local ComfyUI.")
-    parser.add_argument("--comfy-url", default=DEFAULT_BASE_URL, help="ComfyUI API base URL.")
+    parser = argparse.ArgumentParser(description="向本机 ComfyUI 提交基础文生图 workflow。", add_help=False)
+    parser.add_argument("-h", "--help", action="help", help="显示帮助并退出。")
+    parser.add_argument("--comfy-url", default=DEFAULT_BASE_URL, help="ComfyUI API 地址。")
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=DEFAULT_COMFY_OUTPUT,
-        help="ComfyUI output directory used to print reported image paths.",
+        help="ComfyUI 输出目录，用来打印最终图片路径。",
     )
-    parser.add_argument("--prompt", required=True, help="Positive prompt text.")
-    parser.add_argument("--negative", default="low quality, blurry, distorted, watermark, text")
-    parser.add_argument("--ckpt", default=None, help="Checkpoint name. Defaults to the first checkpoint reported by ComfyUI.")
-    parser.add_argument("--width", type=int, default=512)
-    parser.add_argument("--height", type=int, default=512)
-    parser.add_argument("--steps", type=int, default=12)
-    parser.add_argument("--cfg", type=float, default=7.0)
-    parser.add_argument("--seed", type=int, default=None)
-    parser.add_argument("--prefix", default="codex_txt2img")
-    parser.add_argument("--timeout", type=int, default=600)
-    parser.add_argument("--request-timeout", type=int, default=30)
+    parser.add_argument("--prompt", required=True, help="正向提示词，必填。")
+    parser.add_argument("--negative", default="low quality, blurry, distorted, watermark, text", help="反向提示词。")
+    parser.add_argument("--ckpt", default=None, help="checkpoint 名称；不传时自动使用 ComfyUI 返回的第一个 checkpoint。")
+    parser.add_argument("--width", type=int, default=512, help="输出宽度。")
+    parser.add_argument("--height", type=int, default=512, help="输出高度。")
+    parser.add_argument("--steps", type=int, default=12, help="采样步数。")
+    parser.add_argument("--cfg", type=float, default=7.0, help="提示词引导强度。")
+    parser.add_argument("--seed", type=int, default=None, help="随机种子；不传时自动生成。")
+    parser.add_argument("--prefix", default="codex_txt2img", help="输出文件前缀。")
+    parser.add_argument("--timeout", type=int, default=600, help="等待任务完成的最长时间，单位秒。")
+    parser.add_argument("--request-timeout", type=int, default=30, help="单次 HTTP 请求超时时间，单位秒。")
     args = parser.parse_args()
 
     try:
         stats = get_json(args.comfy_url, "/system_stats", args.request_timeout)
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        raise SystemExit(f"ComfyUI is not reachable at {args.comfy_url}: {exc}") from exc
+        raise SystemExit(f"无法连接 ComfyUI：{args.comfy_url}，错误信息：{exc}") from exc
 
     checkpoint = resolve_checkpoint(args)
-    print("ComfyUI:", stats["system"].get("comfyui_version"), args.comfy_url)
-    print("Checkpoint:", checkpoint)
+    print("ComfyUI 版本:", stats["system"].get("comfyui_version"))
+    print("接口地址:", args.comfy_url)
+    print("使用 checkpoint:", checkpoint)
     result = post_json(args.comfy_url, "/prompt", {"prompt": build_prompt(args, checkpoint)}, args.request_timeout)
     prompt_id = result["prompt_id"]
-    print("Queued prompt:", prompt_id)
+    print("已提交任务 ID:", prompt_id)
 
     outputs = wait_for_outputs(prompt_id, args.timeout, args.comfy_url, args.request_timeout, args.output_dir)
     if not outputs:
-        print("Finished, but no image outputs were reported.")
+        print("任务已结束，但 ComfyUI 没有返回图片输出。")
         return
 
-    print("Outputs:")
+    print("输出图片路径:")
     for path in outputs:
         print(path)
 

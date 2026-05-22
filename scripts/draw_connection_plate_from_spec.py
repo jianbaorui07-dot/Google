@@ -84,6 +84,7 @@ def setup_doc(doc):
     ensure_layer(doc, "CENTER_DASH", 8, "CENTER")
     ensure_layer(doc, "DIM_THIN", 7)
     ensure_layer(doc, "CONSTRUCTION_DASH", 8, "CENTER")
+    ensure_layer(doc, "CN_LABEL", 3)
 
 
 def style(entity, layer, color=7, lineweight=25, linetype=None):
@@ -144,12 +145,12 @@ def dim_aligned(model, p1, p2, text_position, override=None):
     return dim
 
 
-def arrowhead(model, tip, angle_deg, size=1.8):
+def arrowhead(model, tip, angle_deg, size=1.8, layer="DIM_THIN", color=7):
     angle = math.radians(angle_deg)
     for offset in (150, -150):
         a = angle + math.radians(offset)
         end = (tip[0] + size * math.cos(a), tip[1] + size * math.sin(a), 0)
-        line(model, tip, end, "DIM_THIN", 7, 15)
+        line(model, tip, end, layer, color, 15)
 
 
 def leader(model, tip, elbow, label_position, label, text_rotation=0.0):
@@ -158,6 +159,14 @@ def leader(model, tip, elbow, label_position, label, text_rotation=0.0):
     direction = math.degrees(math.atan2(elbow[1] - tip[1], elbow[0] - tip[0]))
     arrowhead(model, tip, direction + 180)
     text(model, label_position, label, 3.2, text_rotation)
+
+
+def cn_label(model, tip, elbow, label_position, label):
+    line(model, tip, elbow, "CN_LABEL", 3, 15)
+    line(model, elbow, label_position, "CN_LABEL", 3, 15)
+    direction = math.degrees(math.atan2(elbow[1] - tip[1], elbow[0] - tip[0]))
+    arrowhead(model, tip, direction + 180, layer="CN_LABEL", color=3)
+    text(model, label_position, label, 3.4, layer="CN_LABEL", color=3)
 
 
 def center_cross(model, center, radius, extension=4.0):
@@ -330,6 +339,16 @@ def draw_plate():
     leader(model, (right_lower[0] - 4.3, right_lower[1] - 4.2, 0), (50, -50, 0), (46, -50, 0), "%%c12")
     leader(model, (right_lower[0] + 3.1, right_lower[1] + 2.5, 0), (63, -35, 0), (66, -35, 0), "%%c8")
 
+    # Chinese area labels for readers who inspect the generated DWG.
+    text(model, (-24, 44, 0), "连接板参数化示例（单位：mm）", 4.5, layer="CN_LABEL", color=3)
+    text(model, (-24, 39, 0), "公开演示图纸：只含虚构尺寸，不含客户数据", 3.2, layer="CN_LABEL", color=3)
+    cn_label(model, (big[0] + 9, big[1] + 7, 0), (72, 16, 0), (76, 16, 0), "主圆孔区：外圆 %%c44 / 内孔 %%c24")
+    cn_label(model, (left_top[0] - 4, left_top[1] + 4, 0), (-35, 17, 0), (-58, 17, 0), "左上安装孔区：%%c19 / %%c11")
+    cn_label(model, (lower_left[0] - 5, lower_left[1] - 5, 0), (-35, -46, 0), (-58, -46, 0), "左下定位孔区：%%c13，外角 R10")
+    cn_label(model, (right_lower[0] + 3, right_lower[1] + 3, 0), (78, -35, 0), (82, -35, 0), "右下小孔区：%%c12 / %%c8")
+    cn_label(model, (27, -21, 0), (10, -18, 0), (-18, -18, 0), "外轮廓连接区：R80 圆弧过渡")
+    cn_label(model, (big[0], 0, 0), (68, 5, 0), (76, 5, 0), "中心线基准：孔距和角度从这里读取")
+
     try:
         app.ZoomExtents()
     except Exception:
@@ -358,5 +377,11 @@ def draw_plate():
 
 if __name__ == "__main__":
     result = draw_plate()
+    labels = {
+        "document": "当前图纸",
+        "output": "输出文件",
+        "modelspace_count": "图元数量",
+        "centers": "孔位中心坐标",
+    }
     for key, value in result.items():
-        print(f"{key}={value}")
+        print(f"{labels.get(key, key)}：{value}")

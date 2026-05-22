@@ -4,6 +4,33 @@
 
 公开仓库只放说明、协议、示例脚本和安全检查。不放个人路径、账号、模型、素材、生成图、客户图纸、授权信息和本机缓存。
 
+## 中文阅读指南
+
+如果你是第一次打开这个仓库，按下面顺序看就够了：
+
+| 阅读顺序 | 看哪里 | 解决什么问题 |
+| --- | --- | --- |
+| 1 | 本页 README | 先知道仓库分成哪几个区域 |
+| 2 | `docs/中文用途索引.md` | 找到每个文件的中文用途 |
+| 3 | `examples/bridge_status.py` | 检查本机四条软件桥是否可用 |
+| 4 | 对应单项文档 | 按 CAD / ComfyUI / Photoshop / Blender 分别配置 |
+| 5 | 对应示例脚本 | 真的运行、生成、检查或导出 |
+
+## 仓库区域标注
+
+这个仓库按“区域”组织，每个区域只负责一件事：
+
+| 区域 | 目录或文件 | 中文说明 |
+| --- | --- | --- |
+| 总览区 | `README.md`、`docs/中文介绍.md` | 说明星桥整体方案和安全边界 |
+| 中文索引区 | `docs/中文用途索引.md` | 用中文标注每个主要文件的用途 |
+| 状态检查区 | `examples/bridge_status.py` | 一次检查 ComfyUI、Blender、CAD、Photoshop 四条桥 |
+| 图像生成区 | `examples/comfy_bridge/` | 连接本机 ComfyUI，检查模型并提交文生图 |
+| 工程制图区 | `cad-mcp-autocad/`、`scripts/` | 连接 AutoCAD / CAD MCP，生成带中文说明的示例图纸 |
+| 修图抠图区 | `examples/photoshop_bridge/` | 连接 Photoshop，做 COM 探针和主体抠图实验 |
+| 三维扩展区 | `docs/04-codex-blender.md` | 说明 Blender 接入方式和后续脚本方向 |
+| 安全隔离区 | `.gitignore`、`AGENTS.md` | 说明哪些内容不能进入 GitHub |
+
 ## 项目总目录
 
 | 编号 | 项目 | 先看这个 | 当前状态 |
@@ -25,6 +52,7 @@
 | 路径 | 用途 |
 | --- | --- |
 | `docs/中文介绍.md` | 总协议：四条本地软件桥怎么组织 |
+| `docs/中文标注规范.md` | 中文标注规范：区域、脚本输出和 CAD 图纸怎么写中文标签 |
 | `docs/codex-drawing-tool-integrations.md` | 绘画、图像、设计、三维、制图工具路线图 |
 | `docs/中文用途索引.md` | 全仓库中文索引 |
 | `examples/bridge_status.py` | 检查 ComfyUI / Blender / CAD / Photoshop 状态 |

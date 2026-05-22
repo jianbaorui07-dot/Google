@@ -70,6 +70,7 @@ def setup_layers(doc):
     ensure_layer(doc, "PART_CENTER", 8, "CENTER")
     ensure_layer(doc, "PART_DIM", 7)
     ensure_layer(doc, "PART_CONSTRUCTION", 8, "CENTER")
+    ensure_layer(doc, "PART_CN_LABEL", 3)
 
 
 def style(entity, layer, color=7, lineweight=25, linetype=None):
@@ -138,6 +139,14 @@ def leader(model, start, elbow, label_pos, label, rotation=0):
     angle = math.degrees(math.atan2(elbow[1] - start[1], elbow[0] - start[0]))
     arrowhead(model, start, angle + 180, 1.5, "PART_DIM")
     text(model, label_pos, label, 3.3, "PART_DIM", 7, rotation)
+
+
+def cn_label(model, start, elbow, label_pos, label):
+    line(model, start, elbow, "PART_CN_LABEL", 3, 15)
+    line(model, elbow, label_pos, "PART_CN_LABEL", 3, 15)
+    angle = math.degrees(math.atan2(elbow[1] - start[1], elbow[0] - start[0]))
+    arrowhead(model, start, angle + 180, 1.5, "PART_CN_LABEL")
+    text(model, label_pos, label, 3.4, "PART_CN_LABEL", 3)
 
 
 def draw_center_cross(model, center, radius, extra=4):
@@ -252,6 +261,16 @@ def draw():
     leader(model, (right_lower[0] - 4.4, right_lower[1] - 4.1, 0), (50, -49, 0), (46, -49, 0), "%%c12")
     leader(model, (right_lower[0] + 3.0, right_lower[1] + 2.6, 0), (62, -35, 0), (65, -35, 0), "%%c8")
 
+    # Chinese labels make every functional area clear in the generated DWG.
+    text(model, (-24, 44, 0), "参考机械零件示例（单位：mm）", 4.5, "PART_CN_LABEL", 3)
+    text(model, (-24, 39, 0), "区域标注：孔位、轮廓、中心线和尺寸均为公开演示", 3.2, "PART_CN_LABEL", 3)
+    cn_label(model, (large[0] + 9, large[1] + 7, 0), (72, 16, 0), (76, 16, 0), "大圆基准区：外圆 %%c44 / 内孔 %%c24")
+    cn_label(model, (upper_left[0] - 4, upper_left[1] + 4, 0), (-35, 17, 0), (-58, 17, 0), "左上安装孔区：%%c19 / %%c11")
+    cn_label(model, (lower_left[0] - 5, lower_left[1] - 5, 0), (-35, -45, 0), (-58, -45, 0), "左下圆角孔区：%%c13，圆角 R10")
+    cn_label(model, (right_lower[0] + 3, right_lower[1] + 3, 0), (77, -35, 0), (82, -35, 0), "右下小孔区：%%c12 / %%c8")
+    cn_label(model, (30, -22, 0), (11, -18, 0), (-18, -18, 0), "下侧轮廓区：R80 过渡圆弧")
+    cn_label(model, (large[0], 0, 0), (68, 5, 0), (76, 5, 0), "中心线基准区：孔距 41、角度 69%%d")
+
     try:
         app.ZoomExtents()
     except Exception:
@@ -269,6 +288,6 @@ def draw():
 
 if __name__ == "__main__":
     document, output, count = draw()
-    print(f"active_document={document.Name}")
-    print(f"output={output}")
-    print(f"modelspace_count={count}")
+    print(f"当前图纸：{document.Name}")
+    print(f"输出文件：{output}")
+    print(f"图元数量：{count}")
