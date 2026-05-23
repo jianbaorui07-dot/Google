@@ -1,6 +1,6 @@
 # 星桥链接协议
 
-这个文件是 **StarBridge / 星桥** 的公开入口页。旧链接仍然指向这里，所以这里不再只做跳转，而是直接说明：这个项目怎么读、四条本地软件桥怎么分工、Codex 如何在本机接入 Photoshop，以及哪些内容不能进入 GitHub。
+这个文件是 **StarBridge / 星桥** 的公开入口页。旧链接仍然指向这里，所以这里不再只做跳转，而是直接说明：这个项目怎么读、本地软件桥怎么分工、Codex 如何在本机接入 Photoshop，以及哪些内容不能进入 GitHub。
 
 ## 一、这个协议解决什么问题
 
@@ -14,6 +14,8 @@
 | Blender | 本机三维场景、灯光、相机、材质和渲染 |
 | CAD / AutoCAD | 工程制图、孔位、尺寸、图层和 DWG 输出 |
 | Photoshop | 修图、主体选择、抠图、图层处理和 PNG 导出 |
+| Illustrator | 矢量图形、线稿矢量化、SVG/PDF 导出 |
+| 剪映 / CapCut | 短视频草稿、模板、字幕、时间线和导出确认 |
 
 一句话：**Codex 负责连接和自动化，专业软件负责生成和处理，私有资产只留本机。**
 
@@ -22,12 +24,13 @@
 | 入口 | 中文用途 |
 | --- | --- |
 | `README.md` | 仓库总览、区域标注、快速检查命令 |
-| `docs/中文介绍.md` | 星桥总协议，说明四条桥的完整路线 |
+| `docs/中文介绍.md` | 星桥总协议，说明多条本地软件桥的完整路线 |
 | `docs/中文用途索引.md` | 每个主要文件的中文用途索引 |
 | `docs/中文标注规范.md` | 区域命名、脚本输出和 CAD 图纸中文标注规则 |
-| `examples/bridge_status.py` | 一次检查 ComfyUI、Blender、CAD、Photoshop 四条桥 |
+| `docs/06-codex-jianying.md` | Codex 接入剪映 / CapCut 的调研和本地草稿桥路线 |
+| `examples/bridge_status.py` | 一次检查 ComfyUI、Blender、CAD、Photoshop 等本地桥 |
 
-## 三、四条桥的区域划分
+## 三、核心桥的区域划分
 
 | 区域 | 目录或文件 | 当前能力 |
 | --- | --- | --- |
@@ -35,6 +38,7 @@
 | 三维场景桥 | `docs/04-codex-blender.md` | 记录 Blender 接入方式和后续脚本方向 |
 | 工程制图桥 | `cad-mcp-autocad/`、`scripts/` | AutoCAD MCP、COM 绘图、中文区域标注示例图 |
 | Photoshop 修图桥 | `examples/photoshop_bridge/` | COM 探针、测试文档导出、主体抠图、一键本机实操 |
+| 剪映/CapCut 短视频剪辑桥 | `docs/06-codex-jianying.md` | 调研本地草稿生成、模板替换、字幕导入和 MCP 封装路线 |
 
 ## 四、Photoshop 本机接入实操
 
@@ -49,7 +53,7 @@
 | COM 注册 | `Photoshop.Application` 能被 PowerShell 创建 |
 | 本机路径 | 不写进 Git，用参数或环境变量传入 |
 
-可以先检查四条桥状态：
+可以先检查当前已接入桥状态：
 
 ```powershell
 python examples\bridge_status.py
@@ -216,6 +220,7 @@ powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\extra
 - Photoshop 安装路径、Creative Cloud 缓存、账号、许可证、Cookie、token。
 - PSD 私有工程、商业字体、商业笔刷、购买素材、客户图片。
 - 源图、导出图、抠图结果、桌面路径、真实项目输出。
+- 剪映 / CapCut 草稿、缓存、导出视频、字幕原稿、会员状态和账号信息。
 - 任何需要登录、订阅、验证码、OAuth 或人工授权的信息。
 
 ## 八、故障排查表
