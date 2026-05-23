@@ -360,6 +360,62 @@ def check_photoshop(probe_com: bool) -> dict:
         return status("Photoshop", "warn", details, data, "Photoshop 修图桥")
 
 
+def find_illustrator() -> Path | None:
+    env_path = os.environ.get("ILLUSTRATOR_EXE")
+    if not env_path:
+        return None
+
+    candidate = Path(env_path)
+    return candidate if candidate.exists() else None
+
+
+def check_illustrator(probe_com: bool) -> dict:
+    illustrator = find_illustrator()
+    has_win32com = importlib.util.find_spec("win32com") is not None
+    details = [
+        "术语说明：这里的 AI 文件指 Adobe Illustrator 的 .ai 矢量工程，不是大模型 AI。",
+        "安全说明：Illustrator 安装路径、AI 私有工程、源图和导出结果不写进公开仓库。",
+        f"是否配置 ILLUSTRATOR_EXE：{bool(os.environ.get('ILLUSTRATOR_EXE'))}",
+        f"ILLUSTRATOR_EXE 路径是否存在：{bool(illustrator)}",
+        f"当前 Python 是否有 pywin32/win32com：{has_win32com}",
+    ]
+    data: dict[str, str | bool | int | None] = {
+        "illustrator_exe_configured": bool(os.environ.get("ILLUSTRATOR_EXE")),
+        "illustrator_exe_exists": bool(illustrator),
+        "has_win32com": has_win32com,
+    }
+
+    if not probe_com:
+        details.append("已跳过 COM 探测。需要连接已打开的 Illustrator 时加 --probe-executables。")
+        if illustrator:
+            state = "ok"
+        elif has_win32com:
+            state = "warn"
+            details.append("pywin32/win32com 可用，但还没有确认 Illustrator 可执行文件或正在运行的 COM 对象。")
+        else:
+            state = "warn"
+        return status("Illustrator", state, details, data, "AI 矢量文件桥")
+
+    if not has_win32com:
+        details.append("处理建议：如需 Python COM 探测，请安装 pywin32。")
+        return status("Illustrator", "warn", details, data, "AI 矢量文件桥")
+
+    try:
+        import win32com.client  # type: ignore[import-not-found]
+
+        app = win32com.client.GetActiveObject("Illustrator.Application")
+        version = str(app.Version)
+        documents = int(app.Documents.Count)
+        details.append(f"已连接 Illustrator COM：版本 {version}，当前文档数 {documents}")
+        data.update({"active_com_object": True, "version": version, "documents": documents})
+        return status("Illustrator", "ok", details, data, "AI 矢量文件桥")
+    except Exception as exc:  # noqa: BLE001 - status script should keep going.
+        details.append(f"未找到正在运行的 Illustrator COM 对象：{exc}")
+        details.append("处理建议：手动打开 Illustrator 后，再加 --probe-executables 运行。")
+        data["active_com_object"] = False
+        return status("Illustrator", "warn", details, data, "AI 矢量文件桥")
+
+
 def print_text_report(results: list[dict]) -> None:
     print("星桥本地软件接入状态")
     print("=" * 28)
@@ -390,6 +446,7 @@ def main() -> None:
         check_blender(args.probe_executables, args.timeout),
         check_cad(),
         check_photoshop(args.probe_executables),
+        check_illustrator(args.probe_executables),
     ]
 
     if args.json:

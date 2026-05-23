@@ -18,6 +18,7 @@ class ChineseLabelCoverageTest(unittest.TestCase):
         self.assertIn("仓库区域标注", readme)
         self.assertIn("图像生成区", readme)
         self.assertIn("工程制图区", readme)
+        self.assertIn("AI 矢量文件桥", readme)
 
     def test_comfy_readme_uses_chinese_area_labels(self) -> None:
         readme = self.read_text("examples/comfy_bridge/README.md")
@@ -58,7 +59,25 @@ class ChineseLabelCoverageTest(unittest.TestCase):
         self.assertIn("验收标准", protocol)
         self.assertIn("透明像素统计", protocol)
         self.assertIn("主体边界", protocol)
+        self.assertIn("AI 矢量文件桥", protocol)
+        self.assertIn("Adobe Illustrator 的 `.ai`", protocol)
         self.assertIn("星桥链接协议入口", index)
+
+    def test_illustrator_vector_bridge_is_indexed(self) -> None:
+        readme = self.read_text("README.md")
+        protocol = self.read_text("docs/starbridge-link-protocol.md")
+        index = self.read_text("docs/中文用途索引.md")
+        illustrator_doc = self.read_text("docs/05-codex-illustrator.md")
+        bridge_status = self.read_text("examples/bridge_status.py")
+
+        self.assertIn("docs/05-codex-illustrator.md", readme)
+        self.assertIn("docs/05-codex-illustrator.md", protocol)
+        self.assertIn("docs/05-codex-illustrator.md", index)
+        self.assertIn("AI 矢量文件", illustrator_doc)
+        self.assertIn("ILLUSTRATOR_EXE", illustrator_doc)
+        self.assertIn("trace_image_to_vector", illustrator_doc)
+        self.assertIn("def check_illustrator", bridge_status)
+        self.assertIn("Illustrator.Application", bridge_status)
 
 
 if __name__ == "__main__":

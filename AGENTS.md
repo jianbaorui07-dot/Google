@@ -23,6 +23,7 @@
 - Blender 私有 `.blend`、贴图、资产库、渲染缓存。
 - CAD 客户图纸、商业 DWG、授权文件和真实项目输出。
 - Photoshop 安装路径、Creative Cloud 缓存、PSD 私有工程、商业字体、商业笔刷、购买素材、源图路径和导出结果。
+- Illustrator 安装路径、Creative Cloud 缓存、AI 私有工程、商业字体、商业画笔、购买素材、源图路径和导出结果。
 - 密码、token、Cookie、OAuth 缓存、浏览器资料、支付信息。
 
 ## 修改规则
@@ -31,6 +32,7 @@
 - 说明文字以中文为主；命令、路径、API、MCP、workflow、prompt 等必要术语可以保留英文。
 - 新增下载源码或安装包时，先放到本机下载收件箱；用 `STARBRIDGE_DOWNLOAD_INBOX` 在本地配置，不要把真实路径写进仓库。
 - Photoshop 示例必须通过参数传入输入和输出路径；不要把个人路径、文件名、素材目录或桌面路径写成默认值。
+- Illustrator / AI 矢量文件示例必须通过参数传入输入和输出路径；不要把客户图稿、源图路径、导出目录或 `.ai` 私有工程写进仓库。
 - 修改 Python 脚本前先检查 imports、输入路径、输出路径和平台依赖。
 - 修改 `cad-mcp-autocad/` 时，尽量把改动限制在该子项目内。
 - 不要删除本机文件；如果只是清理 GitHub 发布范围，优先用 `git rm --cached` 让文件留在本地。
@@ -58,4 +60,4 @@ python examples\comfy_bridge\comfy_probe.py
 python scripts\test_autocad_mcp.py
 ```
 
-注意：AutoCAD 自动化需要 Windows 和本机 AutoCAD。ComfyUI 相关脚本需要先启动本机 ComfyUI。
+注意：AutoCAD 自动化需要 Windows 和本机 AutoCAD。ComfyUI 相关脚本需要先启动本机 ComfyUI。Photoshop 和 Illustrator 自动化需要本机已授权的 Adobe 桌面软件。

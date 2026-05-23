@@ -1,6 +1,6 @@
 # 星桥链接协议
 
-这个文件是 **StarBridge / 星桥** 的公开入口页。旧链接仍然指向这里，所以这里不再只做跳转，而是直接说明：这个项目怎么读、本地软件桥怎么分工、Codex 如何在本机接入 Photoshop，以及哪些内容不能进入 GitHub。
+这个文件是 **StarBridge / 星桥** 的公开入口页。旧链接仍然指向这里，所以这里不再只做跳转，而是直接说明：这个项目怎么读、本地软件桥怎么分工、Codex 如何在本机接入 Photoshop 和 AI 矢量文件，以及哪些内容不能进入 GitHub。
 
 ## 一、这个协议解决什么问题
 
@@ -27,8 +27,9 @@
 | `docs/中文介绍.md` | 星桥总协议，说明多条本地软件桥的完整路线 |
 | `docs/中文用途索引.md` | 每个主要文件的中文用途索引 |
 | `docs/中文标注规范.md` | 区域命名、脚本输出和 CAD 图纸中文标注规则 |
+| `docs/05-codex-illustrator.md` | Codex 接入 Illustrator / AI 矢量文件的中文说明 |
 | `docs/06-codex-jianying.md` | Codex 接入剪映 / CapCut 的调研和本地草稿桥路线 |
-| `examples/bridge_status.py` | 一次检查 ComfyUI、Blender、CAD、Photoshop 等本地桥 |
+| `examples/bridge_status.py` | 一次检查 ComfyUI、Blender、CAD、Photoshop、Illustrator 等本地桥 |
 
 ## 三、核心桥的区域划分
 
@@ -38,7 +39,20 @@
 | 三维场景桥 | `docs/04-codex-blender.md` | 记录 Blender 接入方式和后续脚本方向 |
 | 工程制图桥 | `cad-mcp-autocad/`、`scripts/` | AutoCAD MCP、COM 绘图、中文区域标注示例图 |
 | Photoshop 修图桥 | `examples/photoshop_bridge/` | COM 探针、测试文档导出、主体抠图、一键本机实操 |
+| AI 矢量文件桥 | `docs/05-codex-illustrator.md` | 说明 Illustrator `.ai` 文件、线稿矢量化、SVG/PDF 导出和安全边界 |
 | 剪映/CapCut 短视频剪辑桥 | `docs/06-codex-jianying.md` | 调研本地草稿生成、模板替换、字幕导入和 MCP 封装路线 |
+
+### 3.1 AI 矢量文件桥怎么理解
+
+中文创作场景里经常把 Adobe Illustrator 的 `.ai` 工程叫做 **AI 文件**。这里的 AI 矢量文件不是人工智能模型文件，而是可编辑的矢量设计文件。Codex 接入这条桥时，重点不是上传 `.ai` 私有工程，而是把可复用动作描述清楚：
+
+| 输入 | Codex 做什么 | Illustrator 做什么 | 输出 |
+| --- | --- | --- | --- |
+| 线稿、黑白图、图标草图 | 生成参数、调用脚本、检查路径安全 | Image Trace、扩展路径、清理矢量 | SVG / PDF / PNG 预览 |
+| 包装或物料尺寸 | 转成画板、参考线和图层参数 | 绘制路径、标注、导出校样 | `.ai` 本机工程和 PDF 校样 |
+| 品牌图标草案 | 生成基础形状和文字占位 | 细化路径、颜色、版式和画板 | SVG / PDF / PNG |
+
+公开仓库只保存接入说明、状态检查和通用脚本方向；客户图稿、私有 `.ai`、源图路径、导出结果和商业字体都只留本机。详细说明见 `docs/05-codex-illustrator.md`。
 
 ## 四、Photoshop 本机接入实操
 
@@ -207,6 +221,8 @@ powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\extra
 | Photoshop 探针 PNG | `output\photoshop_bridge_practice\` | 不提交 |
 | 主体抠图 PNG | `output\photoshop_bridge_practice\` | 不提交 |
 | 临时测试图 | `output\photoshop_bridge_practice\` | 不提交 |
+| AI 私有工程 | 本机私有目录 | 不提交 |
+| SVG/PDF/PNG 导出结果 | 本机临时目录或 `output\` | 不提交 |
 | 脚本和说明 | `examples/`、`docs/` | 可以提交 |
 | 私有 PSD、客户图、商业素材 | 本机私有目录 | 不提交 |
 
@@ -223,6 +239,7 @@ powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\extra
 
 - Photoshop 安装路径、Creative Cloud 缓存、账号、许可证、Cookie、token。
 - PSD 私有工程、商业字体、商业笔刷、购买素材、客户图片。
+- Illustrator `.ai` 私有工程、商业字体、商业画笔、购买素材、客户图稿和导出结果。
 - 源图、导出图、抠图结果、桌面路径、真实项目输出。
 - 剪映 / CapCut 草稿、缓存、导出视频、字幕原稿、会员状态和账号信息。
 - 任何需要登录、订阅、验证码、OAuth 或人工授权的信息。
@@ -253,7 +270,9 @@ powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\extra
 | 已完成 | 增加主体边界盒质量指标 |
 | 已完成 | 增加 Photoshop 当前文档信息读取脚本 |
 | 已完成 | 增加 Photoshop 本机环境诊断脚本 |
+| 已完成 | 增加 AI 矢量文件桥中文说明入口 |
 | 中 | 把 `extract_subject`、`export_png` 封装成本机 MCP 工具 |
+| 中 | 给 Illustrator 增加只读文档信息、测试画板和 Image Trace 参数化示例 |
 | 中 | 增加二次蒙版、边缘羽化和人工确认流程 |
 | 低 | 评估 UXP 面板，把当前文档、图层、选择区暴露给本地桥 |
 
