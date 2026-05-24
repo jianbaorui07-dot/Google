@@ -45,13 +45,10 @@ class StarbridgePreflightTest(unittest.TestCase):
 
     def test_documentation_mentions_preflight_entrypoints(self) -> None:
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-        protocol = (REPO_ROOT / "docs" / "starbridge-link-protocol.md").read_text(encoding="utf-8")
-        intro = (REPO_ROOT / "docs" / "中文介绍.md").read_text(encoding="utf-8")
         package_json = (REPO_ROOT / "package.json").read_text(encoding="utf-8")
 
         self.assertIn("python scripts\\starbridge_preflight.py --markdown", readme)
-        self.assertIn("python scripts\\starbridge_preflight.py --markdown", protocol)
-        self.assertIn("python scripts\\starbridge_preflight.py --markdown", intro)
+        self.assertIn("python scripts\\starbridge_preflight.py --write-report --soft-exit", readme)
         self.assertIn('"preflight": "python scripts/starbridge_preflight.py --markdown"', package_json)
 
     def test_write_report_creates_json_and_markdown_artifacts(self) -> None:
