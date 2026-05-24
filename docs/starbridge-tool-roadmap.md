@@ -13,6 +13,8 @@
 | `export_result` | 导出 PNG/SVG/PDF/DXF/视频草稿等结果 | 只导出到参数指定目录或本机忽略目录 |
 | `run_script` | 执行小型参数化自动化脚本 | 默认关闭；必须限制脚本来源、参数和输出目录 |
 
+所有 status/probe JSON 输出必须经过 StarBridge sanitizer。普通 `--json` 不因本机软件未安装或未启动而失败；`--strict` 才用于失败退出码。当前第一台电脑只维护核心状态入口、统一 schema 和安全输出，不扩展 ComfyUI 或剪映 / CapCut bridge。
+
 ## Bridge 路线图
 
 | Bridge | status | probe | open_file | read_document_info | export_result | run_script |

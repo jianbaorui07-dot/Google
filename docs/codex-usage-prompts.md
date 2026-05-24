@@ -71,6 +71,9 @@
 每次调用 StarBridge 都应遵守：
 
 - 不输出真实用户目录、安装目录、素材目录、模型文件名、账号、token、Cookie。
+- 普通 `--json` 用于交互式状态检查，即使某些 bridge 未配置也应返回 exit code 0，并通过 `ok=false`、`warnings`、`next_steps` 说明。
+- `--strict` 用于 CI 或合并门禁，任一 bridge 未通过时可以返回 exit code 1。
 - 不提交或读取 PSD、AI、DWG、DXF、剪映草稿、模型、生成图片、导出视频。
 - 需要登录、授权、验证码、订阅或 OAuth 时停止，让用户手动处理。
 - 写入类动作必须要求用户显式传入输入路径和输出路径。
+- 第一台电脑只维护 StarBridge 核心 status/probe、schema、sanitizer 和合并准备；不要扩展 ComfyUI 或剪映 / CapCut bridge，避免和第二台电脑冲突。

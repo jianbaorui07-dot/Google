@@ -164,3 +164,40 @@ OK
 - `examples/bridge_status.py` 仍是实际探测逻辑中心，后续应逐步迁移到 `starbridge_mcp.core`，避免双入口长期分叉。
 - Photoshop、Illustrator、AutoCAD 的写入动作必须先加输入/输出路径审计和用户确认策略。
 - 剪映/CapCut 不建议先做桌面自动点击，优先研究草稿桥和 CLI 方式。
+
+## 第三轮核心安全收口
+
+时间：2026-05-24
+
+本轮只处理第一台电脑负责的 StarBridge 核心安全输出，不开发新 bridge，不扩展 ComfyUI，不扩展剪映 / CapCut，也不修改 CI、SECURITY、CONTRIBUTING 或发布审计文档。
+
+完成内容：
+
+- 统一增强 `starbridge_mcp.core.security` 的递归脱敏能力。
+- `server.py` 与 `examples/bridge_status.py` 的最终 JSON 输出均经过 sanitizer。
+- 输出中不保留真实用户目录、安装目录、模型路径、素材路径或剪映草稿路径。
+- 普通 `--json` 和 `--strict` 行为保持不变：
+  - 普通 `--json`：只做状态报告，exit code 0。
+  - `--strict`：任一 bridge 未通过时 exit code 1，适合 CI 或合并门禁。
+- 未跟踪 CAD MVP 实验文件仍保持未提交状态。
+
+第三轮验证覆盖了 Windows 用户目录、macOS 用户目录、Linux home 目录、AppData、Desktop、Documents、模型文件、PSD、AI、DWG/DXF、视频和剪映草稿文件名等敏感输出风险。
+
+第三轮验证结果：
+
+```text
+python -m unittest discover -s tests
+通过
+
+python -m starbridge_mcp.server --json
+exit code 0
+
+python -m starbridge_mcp.server --json --strict
+exit code 1（当前本机 bridge 未全部配置，符合预期）
+
+python examples\bridge_status.py --json
+exit code 0
+
+npm.cmd test
+通过
+```

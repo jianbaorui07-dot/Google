@@ -4,7 +4,6 @@ import argparse
 import importlib.util
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -16,6 +15,11 @@ from pathlib import Path
 DEFAULT_COMFY_URL = "http://127.0.0.1:8188"
 BASIC_COMFY_NODES = ["CheckpointLoaderSimple", "CLIPTextEncode", "KSampler", "VAEDecode", "SaveImage"]
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from starbridge_mcp.core.security import sanitize_details, sanitize_text  # noqa: E402
+
 DOWNLOAD_INBOX = os.environ.get("STARBRIDGE_DOWNLOAD_INBOX")
 STATUS_LABELS = {
     "ok": "正常",
@@ -25,23 +29,8 @@ STATUS_LABELS = {
 }
 
 
-def redact_text(value: str) -> str:
-    home = str(Path.home())
-    redacted = value
-    if home:
-        redacted = re.sub(re.escape(home), "<USER_HOME>", redacted, flags=re.IGNORECASE)
-    redacted = re.sub(r"C:\\Users\\[^\\\s，）)]+", "<USER_HOME>", redacted, flags=re.IGNORECASE)
-    return redacted
-
-
 def safe_value(value):
-    if isinstance(value, str):
-        return redact_text(value)
-    if isinstance(value, list):
-        return [safe_value(item) for item in value]
-    if isinstance(value, dict):
-        return {key: safe_value(item) for key, item in value.items()}
-    return value
+    return sanitize_details(value)
 
 
 def unique_paths(paths: list[Path]) -> list[Path]:
@@ -482,7 +471,7 @@ def print_text_report(results: list[dict]) -> None:
     for result in results:
         print(f"\n[{result['status_label']}] {result['label']}")
         for detail in result["details"]:
-            print(f"- {detail}")
+            print(f"- {sanitize_text(str(detail))}")
 
 
 def main() -> None:
@@ -515,7 +504,7 @@ def main() -> None:
     ]
 
     if args.json:
-        print(json.dumps({"results": results}, ensure_ascii=False, indent=2))
+        print(json.dumps(sanitize_details({"results": results}), ensure_ascii=False, indent=2))
     else:
         print_text_report(results)
 
