@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible issue in a probe, MCP tool, validator, or documentation command.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste secrets, private project paths, client files, generated media, model files, or license data.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What failed?
+      placeholder: "Describe the failure."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Use public-safe commands and placeholder paths.
+      placeholder: |
+        1. Run `npm.cmd run ...`
+        2. See error ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "What should happen instead?"
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: "Windows version, Python version, optional creative software version"
+    validations:
+      required: false

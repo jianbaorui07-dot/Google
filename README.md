@@ -1,4 +1,13 @@
-# 星桥三联：Codex 本地创作软件接入仓库
+# 星桥三联：StarBridge Creative Software MCP
+
+[![CI](https://github.com/jianbaorui07-dot/Codex-Integration-with-Creative-Industry-Software/actions/workflows/ci.yml/badge.svg)](https://github.com/jianbaorui07-dot/Codex-Integration-with-Creative-Industry-Software/actions/workflows/ci.yml)
+![Windows first](https://img.shields.io/badge/Windows-first-2563eb)
+![MCP stdio](https://img.shields.io/badge/MCP-stdio-16a34a)
+![Local first](https://img.shields.io/badge/local--first-safe-0f766e)
+
+**English quick summary:** StarBridge is a Windows-first, local-first MCP stdio server and safety bridge for connecting AI coding agents to creative desktop software: ComfyUI, Blender, AutoCAD / DXF, Photoshop, Illustrator, and CapCut / Jianying. It focuses on safe probes, workflow validation, redacted status reports, and guarded automation examples instead of uploading private assets or replacing the creative tools.
+
+**Search keywords:** MCP, Model Context Protocol, Codex, AI agent, creative software automation, ComfyUI workflow, Blender automation, AutoCAD DXF, Photoshop COM, Illustrator scripting, CapCut Jianying, local-first AI tools.
 
 这个仓库整理 **Codex 接入本机创作软件** 的公开方案。它不替代 ComfyUI、Blender、CAD、Photoshop、Illustrator 或剪映，而是在本机和 AI 助手之间放一层安全桥：先用 StarBridge 探针确认软件、环境和隐私边界，再用真正 MCP stdio tools 把成熟的只读检查、workflow 校验和受保护 DXF 能力交给 Codex / Cursor / Claude Code 调用。
 
@@ -31,6 +40,19 @@ npm.cmd run bridge:status:safe
 ```
 
 如果 PowerShell 拦截 `npm.ps1`，优先使用 `npm.cmd`。
+
+## For English Readers
+
+Start with this README and [docs/local-mcp-setup.md](docs/local-mcp-setup.md). Most project notes are Chinese-first because the current workstation and software setup are Windows-first, but commands, tool names, environment variables, and MCP APIs are kept in English.
+
+Useful entry points:
+
+| Goal | Open | Run |
+| --- | --- | --- |
+| Discover available MCP tools | [docs/local-mcp-setup.md](docs/local-mcp-setup.md) | `npm.cmd run starbridge:tools:safe` |
+| Check local bridge status | [examples/bridge_status.py](examples/bridge_status.py) | `npm.cmd run bridge:status:safe` |
+| Validate before publishing | [scripts/starbridge_preflight.py](scripts/starbridge_preflight.py) | `npm.cmd run preflight` |
+| Learn how to contribute | [CONTRIBUTING.md](CONTRIBUTING.md) | `npm.cmd test` |
 
 ## 这个仓库解决什么
 

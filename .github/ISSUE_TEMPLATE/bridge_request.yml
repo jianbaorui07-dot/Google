@@ -1,0 +1,43 @@
+name: New software bridge request
+description: Propose a safe local bridge or MCP tool for another creative software workflow.
+title: "[Bridge] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not attach private files, credentials, model checkpoints, PSD/AI/DWG assets, exported videos, or local install paths.
+  - type: input
+    id: software
+    attributes:
+      label: Software or workflow
+      description: Example: ComfyUI upscale, Blender render probe, Photoshop document info, CapCut draft summary.
+      placeholder: "Software name and target workflow"
+    validations:
+      required: true
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: What should the AI agent be able to check, validate, or automate?
+      placeholder: "Describe the expected local workflow."
+    validations:
+      required: true
+  - type: dropdown
+    id: access_level
+    attributes:
+      label: Expected access level
+      options:
+        - Read-only probe
+        - Workflow validation
+        - Dry-run plan generation
+        - File write with explicit confirmation
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety boundary
+      description: What private data, paths, assets, or account state must stay out of GitHub and tool output?
+      placeholder: "List the data that must be redacted or never read."
+    validations:
+      required: true
