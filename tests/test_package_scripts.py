@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shlex
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -83,6 +84,13 @@ class PackageScriptsTest(unittest.TestCase):
             "photoshop:demo:plan",
         ):
             self.assertIn(name, self.scripts)
+
+    def test_pyproject_declares_expected_extras(self) -> None:
+        data = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        extras = data["project"]["optional-dependencies"]
+        self.assertEqual({"dev", "cad", "comfy", "adobe"}, set(extras))
+        self.assertIn("pytest>=8", extras["dev"])
+        self.assertTrue(any(item.startswith("ezdxf") for item in extras["cad"]))
 
 
 if __name__ == "__main__":

@@ -22,12 +22,23 @@ class ToolCapability:
     invocation: str | None = None
     next_step: str | None = None
 
+    @property
+    def current_status(self) -> str:
+        if self.maturity in {"implemented", "prototype"}:
+            return "stable"
+        if self.maturity in {"experimental", "experimental_demo", "research"}:
+            return "experimental"
+        if self.maturity == "planned":
+            return "planned"
+        return "not implemented"
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "bridge": self.bridge,
             "action": self.action,
             "maturity": self.maturity,
+            "current_status": self.current_status,
             "risk_level": self.risk_level,
             "description": self.description,
             "side_effects": self.side_effects,
@@ -156,7 +167,7 @@ CAPABILITIES: tuple[ToolCapability, ...] = (
         name="photoshop.session_info",
         bridge="photoshop",
         action="session_info",
-        maturity="experimental",
+        maturity="prototype",
         risk_level="safe_read_only",
         description="通过 Windows COM 读取 Photoshop session 和当前文档摘要。",
         side_effects="需要已授权 Photoshop；不打开 PSD，不保存导出。",
@@ -226,7 +237,7 @@ CAPABILITIES: tuple[ToolCapability, ...] = (
         name="photoshop.subject_extract",
         bridge="photoshop",
         action="subject_extract",
-        maturity="experimental",
+        maturity="planned",
         risk_level="guarded_local_write",
         description="对用户明确传入的图片运行主体选择并导出测试 PNG。",
         side_effects="会打开输入图片并写出输出 PNG；输入和输出路径必须由参数传入。",
@@ -240,16 +251,15 @@ CAPABILITIES: tuple[ToolCapability, ...] = (
         name="illustrator.document_info",
         bridge="illustrator",
         action="document_info",
-        maturity="experimental",
+        maturity="experimental_demo",
         risk_level="safe_read_only",
-        description="通过状态探针检查 Illustrator COM 线索；后续扩展当前文档、图层、画板和坐标系摘要。",
-        side_effects="不打开私有 .ai 文件，不导出 SVG/PDF/PNG。",
+        description="Read active Illustrator document, artboard, layer, page item, and text frame metadata through COM.",
+        side_effects="Does not open private AI files and does not export files.",
         safe_default=True,
         requires_confirmation=False,
         requires_local_software=True,
         source_projects=("ie3jp/illustrator-mcp-server",),
-        invocation="python -m starbridge_mcp.mcp_server",
-        next_step="先稳定只读 COM/session 探针，再评估 preflight。",
+        invocation="npm.cmd run illustrator:info",
     ),
     ToolCapability(
         name="illustrator.create_demo_artboard",

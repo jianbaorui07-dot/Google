@@ -460,6 +460,7 @@ def _handle_write_dxf(arguments: JsonObject) -> JsonObject:
         arguments.get("plan"),
         str(arguments.get("output_path") or ""),
         dry_run=dry_run,
+        confirm_write=bool(arguments.get("confirm_write", False)),
     )
 
 

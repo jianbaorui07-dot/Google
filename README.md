@@ -5,29 +5,58 @@
 ![MCP stdio](https://img.shields.io/badge/MCP-stdio-16a34a)
 ![Local first](https://img.shields.io/badge/local--first-safe-0f766e)
 
-## Adobe Demo Bridges
+**GitHub description 建议：** Codex Computer Use + StarBridge MCP + Safety Verification Layer for local creative software, with GUI inspection, structured tools, redacted checks, and CI validation.
 
-Illustrator demo:
+## 项目状态：v0.1-alpha
+
+这个仓库当前是 **v0.1-alpha 工程原型**，不是完整多软件生产平台。定位是 Windows-first、local-first 的 **MCP stdio server + tool registry + safety verification layer**，用于让 Codex / Cursor / Claude Code 以可验证方式接入本机创意软件。StarBridge 不替代 ComfyUI、Photoshop、Illustrator、AutoCAD、Blender、剪映/CapCut 或 GUI Computer Use；它只把已经能测试的本地能力收敛成结构化工具，并把实验能力和计划能力明确分开。
+
+当前真实能力分层：
+
+| 状态 | 当前范围 |
+| --- | --- |
+| stable | MCP stdio server、tool registry、统一 status/probe、路径脱敏、安全检查、preflight、ComfyUI workflow validate、AutoCAD/DXF plan validate / dry-run / guarded write。 |
+| experimental | Photoshop sandbox 写入/导出 demo、Illustrator sandbox trace/export demo、Blender scene script 方向、ComfyUI txt2img/img2img/upscale job lifecycle、CapCut / 剪映 draft write 研究。写入类默认必须 dry-run 或显式确认，并限制在 demo/sandbox。 |
+| planned | 多软件完整生产闭环、真实项目素材生命周期、跨软件 asset handoff、可审计 E2E release evidence。 |
+| not implemented | 自动登录、账号授权绕过、读取客户私有工程、提交模型/生成图/客户图纸、无确认写入真实桌面软件。 |
+
+v0.1-alpha 已有且可以验证：
+
+- MCP stdio server：`python -m starbridge_mcp.mcp_server`
+- 工具注册表：`npm.cmd run starbridge:tools:safe`
+- 总状态与安全状态：`npm.cmd run bridge:status:safe`
+- ComfyUI：offline-safe probe、workflow JSON validate；真实生成任务仍依赖本机 ComfyUI 和显式 checkpoint。
+- AutoCAD/DXF：自然语言/JSON plan、`validate_cad_plan`、dry-run、`confirm_write` 受控写入 `examples/cad/output`、manifest/report。
+- Adobe / Blender / CapCut：已有部分 probe/demo 入口，但生产级写入闭环仍是 experimental 或 planned。
+
+关键文档：
+
+- [docs/CAPABILITY_MATRIX.md](docs/CAPABILITY_MATRIX.md)：逐桥能力矩阵，区分 reads/writes/dry-run/真实软件依赖。
+- [docs/RELEASE_V0_1_ALPHA.md](docs/RELEASE_V0_1_ALPHA.md)：v0.1-alpha 只承诺当前真实可运行能力。
+- [SECURITY.md](SECURITY.md)：公开仓库安全边界。
+
+最短运行路径：
 
 ```powershell
-npm.cmd run illustrator:demo:plan
-npm.cmd run illustrator:demo
+python -m pytest
+npm.cmd test
+npm.cmd run preflight
+npm.cmd run bridge:status:safe
+npm.cmd run starbridge:tools:safe
+python scripts\security_check.py
+python scripts\collect_bridge_status.py --json
+python scripts\bridge_capability_matrix.py --check
+python scripts\starbridge_preflight.py --markdown
+python scripts\starbridge_preflight.py --write-report --soft-exit
+python examples\bridge_status.py --json --redact-paths --soft-exit
+python examples\cad\generate_dxf_plan.py
 ```
 
-Photoshop demo:
-
-```powershell
-npm.cmd run photoshop:demo:plan
-npm.cmd run photoshop:demo
-```
-
-See [docs/demo-illustrator.md](docs/demo-illustrator.md) and [docs/demo-photoshop.md](docs/demo-photoshop.md). Real outputs go to `examples/output/` and are ignored by Git.
-
-**English quick summary:** StarBridge is a Windows-first, local-first MCP stdio server and safety bridge for connecting AI coding agents to creative desktop software: ComfyUI, Blender, AutoCAD / DXF, Photoshop, Illustrator, and CapCut / Jianying. It focuses on safe probes, workflow validation, redacted status reports, and guarded automation examples instead of uploading private assets or replacing the creative tools.
+**English quick summary:** This repository is a v0.1-alpha Windows-first local MCP stdio prototype for creative desktop software. Stable scope is limited to the server, tool registry, status/probe, redacted safety checks, ComfyUI workflow validation, and guarded AutoCAD/DXF plan validation/export. Photoshop, Illustrator, Blender, and CapCut write flows are experimental or planned unless a real local E2E run proves otherwise.
 
 **Search keywords:** MCP, Model Context Protocol, Codex, AI agent, creative software automation, ComfyUI workflow, Blender automation, AutoCAD DXF, Photoshop COM, Illustrator scripting, CapCut Jianying, local-first AI tools.
 
-这个仓库整理 **Codex 接入本机创作软件** 的公开方案。它不替代 ComfyUI、Blender、CAD、Photoshop、Illustrator 或剪映，而是在本机和 AI 助手之间放一层安全桥：先用 StarBridge 探针确认软件、环境和隐私边界，再用真正 MCP stdio tools 把成熟的只读检查、workflow 校验和受保护 DXF 能力交给 Codex / Cursor / Claude Code 调用。
+这个仓库整理 **Codex 接入本机创作软件** 的公开方案。新定位不是“用 StarBridge 替代 Computer Use”，而是把两者分工清楚：Computer Use 看真实 GUI、点击和复现问题；StarBridge MCP 把稳定动作做成参数化工具；Safety layer 在两者外侧做路径脱敏、权限边界、只读检查和发布前体检。成熟的只读检查、workflow 校验和受保护 DXF 能力继续通过 MCP stdio tools 交给 Codex / Cursor / Claude Code 调用。
 
 公开仓库只保存说明、协议、示例脚本、workflow、MCP stdio server、工具注册表和安全检查。不保存个人路径、账号、模型、素材、生成图、客户图纸、授权信息或本机缓存。
 
@@ -71,6 +100,8 @@ Useful entry points:
 | Check local bridge status | [examples/bridge_status.py](examples/bridge_status.py) | `npm.cmd run bridge:status:safe` |
 | Validate before publishing | [scripts/starbridge_preflight.py](scripts/starbridge_preflight.py) | `npm.cmd run preflight` |
 | Learn how to contribute | [CONTRIBUTING.md](CONTRIBUTING.md) | `npm.cmd test` |
+| Choose GUI vs MCP path | [docs/computer-use-vs-mcp.md](docs/computer-use-vs-mcp.md) | 不需要运行 |
+| Use Computer Use safely | [docs/07-codex-computer-use.md](docs/07-codex-computer-use.md) | `npm.cmd run bridge:status:safe` |
 
 ## 这个仓库解决什么
 
@@ -85,7 +116,7 @@ Useful entry points:
 | AI 矢量文件桥 | MCP 工具检查 Illustrator COM/session 线索 | Illustrator `.ai`、Image Trace、SVG/PDF/PNG 导出 | 已挂 `illustrator.document_info`，导出脚本未开放 |
 | 剪映/CapCut 短视频剪辑桥 | MCP 工具检查可执行文件和草稿目录配置 | 时间线剪辑、模板、字幕、导出 | 已挂 `jianying_capcut.draft_probe`，不读草稿内容 |
 
-一句话原则：**StarBridge 管安全边界，MCP 管工具调用，专业软件管真实生产，私有资产只留本机。**
+一句话原则：**Computer Use 管 GUI 观察和交互复现，StarBridge 管结构化安全边界，MCP 管稳定工具调用，Safety layer 管脱敏验证，专业软件管真实生产，私有资产只留本机。**
 
 ## 按目标选择入口
 
@@ -101,6 +132,8 @@ Useful entry points:
 | 接入 Blender | [docs/04-codex-blender.md](docs/04-codex-blender.md) | `python examples\bridge_status.py --probe-executables` |
 | 研究接入剪映/CapCut | [docs/06-codex-jianying.md](docs/06-codex-jianying.md) | 先按文档做本地草稿目录确认 |
 | 查看 Photoshop 详细桥方案 | [docs/photoshop-codex-bridge.md](docs/photoshop-codex-bridge.md) | 按文档选择诊断或实操命令 |
+| 判断该用 Computer Use 还是 MCP | [docs/computer-use-vs-mcp.md](docs/computer-use-vs-mcp.md) | 不需要运行 |
+| 查看 Computer Use 安全用法 | [docs/07-codex-computer-use.md](docs/07-codex-computer-use.md) | 不需要运行 |
 | 查看扩展路线 | [docs/codex-drawing-tool-integrations.md](docs/codex-drawing-tool-integrations.md) | 不需要运行 |
 
 ## 仓库区域标注
@@ -176,7 +209,8 @@ MCP 客户端可发现首批安全工具：`starbridge.status`、`starbridge.pro
 
 ```powershell
 python examples\comfy_bridge\comfy_probe.py
-python examples\comfy_bridge\run_txt2img.py --prompt "a quiet futuristic tea house in a garden"
+python examples\comfy_bridge\validate_workflow.py --json
+python examples\comfy_bridge\run_txt2img.py --prompt "a quiet futuristic tea house in a garden" --ckpt "<checkpoint-name>"
 ```
 
 ### CAD / AutoCAD
@@ -195,6 +229,7 @@ python scripts\draw_reference_mechanical_part.py
 powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\diagnose_local.ps1
 powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\document_info.ps1
 powershell -ExecutionPolicy Bypass -File examples\photoshop_bridge\scripts\run_local_practice.ps1
+python examples\photoshop_bridge\write_practice_report.py
 ```
 
 单独运行 COM 探针：
@@ -247,6 +282,8 @@ python scripts\starbridge_preflight.py --markdown
 | 中 | 给 Illustrator 增加只读文档信息、测试画板和 `trace_image_to_vector` 参数化示例 |
 | 中 | 给剪映增加只读草稿目录探针，再验证最小测试草稿生成 |
 | 中 | 为 Penpot/Figma、Krita 建立接入评估表，先记录许可、依赖、账号要求和安全边界 |
+
+完整路线图见 [ROADMAP.md](ROADMAP.md)。
 
 ## 协作原则
 

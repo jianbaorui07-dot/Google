@@ -46,6 +46,7 @@ def probe(base_url: str, timeout: int) -> dict[str, Any]:
             "object_info": False,
             "basic_nodes_checked": [],
         },
+        "status": "unknown",
         "errors": [],
         "warnings": [],
         "safe_to_commit": True,
@@ -58,6 +59,7 @@ def probe(base_url: str, timeout: int) -> dict[str, Any]:
         report["detected"]["python_version"] = stats.get("system", {}).get("python_version")
         report["detected"]["device_count"] = len(stats.get("devices", []))
     except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+        report["status"] = "unavailable"
         report["errors"].append({"code": "system_stats_failed", "message": safe_error(exc)})
         return report
 
@@ -75,10 +77,12 @@ def probe(base_url: str, timeout: int) -> dict[str, Any]:
                 }
             )
     except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+        report["status"] = "unavailable"
         report["errors"].append({"code": "object_info_failed", "message": safe_error(exc)})
         return report
 
     report["ok"] = report["detected"]["system_stats"] and report["detected"]["object_info"]
+    report["status"] = "available" if report["ok"] else "unavailable"
     return report
 
 
